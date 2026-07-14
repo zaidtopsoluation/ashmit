@@ -10,6 +10,45 @@ const ROSE_TYPES = [
   { src: "/rose-purple.png", glow: "rgba(192, 132, 252, 0.4)", shadow: "drop-shadow(0 0 12px rgba(192, 132, 252, 0.5))" } // Purple Rose
 ];
 
+// Polaroid Album Photos config (Now containing 7 couple memories)
+const ALBUM_PHOTOS = [
+  { 
+    src: "/album-1.jpg", 
+    caption: "Matching in traditional shades 💛💚", 
+    rotate: "-rotate-2"
+  },
+  { 
+    src: "/album-2.jpg", 
+    caption: "Thrills & laughter at the park! 🎡", 
+    rotate: "rotate-3"
+  },
+  { 
+    src: "/album-3.jpg", 
+    caption: "Under the glowing umbrella lights ✨☂", 
+    rotate: "-rotate-1"
+  },
+  { 
+    src: "/album-4.jpg", 
+    caption: "Watching sunsets in your arms 🌅", 
+    rotate: "rotate-2"
+  },
+  { 
+    src: "/album-5.png", 
+    caption: "Spontaneous mirror selfie date 🛍", 
+    rotate: "-rotate-3"
+  },
+  { 
+    src: "/album-6.png", 
+    caption: "Strike a pose in red & green 👔👗", 
+    rotate: "rotate-1"
+  },
+  { 
+    src: "/album-7.jpg", 
+    caption: "Mirror tiles and sweet smiles 💖", 
+    rotate: "-rotate-2"
+  }
+];
+
 // Flirty Love Letter Paragraphs
 const LETTER_PARAGRAPHS = [
   "If I could write our story in the stars, it still wouldn’t shine as bright as the spark you brought into my life.",
@@ -78,6 +117,9 @@ export default function Home() {
   const [stage, setStage] = useState("idle");
   const [roses, setRoses] = useState([]);
   
+  // Photo Lightbox modal state
+  const [activePhoto, setActivePhoto] = useState(null);
+  
   // Letter typewriter states
   const letterRef = useRef(null);
   const [letterVisible, setLetterVisible] = useState(false);
@@ -90,6 +132,7 @@ export default function Home() {
     setRoses([]);
     setTypedWordCount(0);
     setLetterVisible(false);
+    setActivePhoto(null);
 
     const spawnedRoses = [];
     const totalRoses = 220;
@@ -143,10 +186,10 @@ export default function Home() {
       ([entry]) => {
         if (entry.isIntersecting) {
           setLetterVisible(true);
-          observer.disconnect(); // trigger typing once
+          observer.disconnect();
         }
       },
-      { threshold: 0.15 } // Trigger when 15% of the card is visible
+      { threshold: 0.15 }
     );
 
     if (letterRef.current) {
@@ -168,7 +211,7 @@ export default function Home() {
       } else {
         clearInterval(interval);
       }
-    }, 180); // 180ms per word typing speed
+    }, 180);
 
     return () => clearInterval(interval);
   }, [letterVisible]);
@@ -178,6 +221,7 @@ export default function Home() {
     setRoses([]);
     setTypedWordCount(0);
     setLetterVisible(false);
+    setActivePhoto(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -265,6 +309,11 @@ export default function Home() {
           to { opacity: 1; transform: translateY(0); }
         }
         
+        @keyframes scaleIn {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+
         @keyframes centralHeartbeat {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.05); }
@@ -290,8 +339,27 @@ export default function Home() {
           animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
+        .animate-scale-in {
+          animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
         .animate-central-rose {
           animation: centralHeartbeat 2.5s infinite ease-in-out;
+        }
+
+        /* Polaroid Album styling */
+        .polaroid-card {
+          background: #ffffff;
+          padding: 12px 12px 24px 12px;
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.45);
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+          cursor: pointer;
+        }
+        
+        .polaroid-card:hover {
+          transform: scale(1.06) rotate(0deg) translateY(-10px) !important;
+          box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
+          z-index: 30;
         }
 
         /* custom scrollbar */
@@ -420,51 +488,37 @@ export default function Home() {
             </p>
           </section>
 
-          {/* Section 2: Story Image Cards */}
+          {/* Section 2: Photo Album (Masonry/Scattered Grid Layout) */}
           <section className="min-h-screen w-full max-w-5xl flex flex-col items-center justify-center my-20">
-            <h3 className="text-2xl md:text-4xl font-serif-title font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-200 to-rose-300 mb-12">
-              Our Little Milestones
+            <h3 className="text-3xl md:text-5xl font-cursive text-center text-rose-300 mb-4">
+              Our Digital Memory Book
             </h3>
+            <p className="text-center text-pink-200/60 font-light text-sm md:text-base mb-12 tracking-wide">
+              Click any photo to view in full size ✨
+            </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-              {/* Card 1 */}
-              <div className="relative group overflow-hidden rounded-3xl border border-pink-500/20 bg-slate-900/60 backdrop-blur-lg p-6 shadow-xl flex flex-col items-center text-center transition-all duration-300 hover:border-pink-500/40 hover:-translate-y-2">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-pink-500 to-rose-400" />
-                <div className="w-20 h-20 mb-6 bg-pink-500/10 rounded-full flex items-center justify-center">
-                  <span className="text-3xl">☕</span>
+            {/* Scrappy, organic scattered grid of Polaroids */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full px-4">
+              {ALBUM_PHOTOS.map((photo, index) => (
+                <div
+                  key={index}
+                  onClick={() => setActivePhoto(index)}
+                  className={`polaroid-card rounded-md flex flex-col items-center ${photo.rotate} self-center mx-auto max-w-[280px] sm:max-w-none w-full`}
+                >
+                  {/* Photo area */}
+                  <div className="w-full aspect-[3/4] overflow-hidden bg-zinc-200 relative rounded">
+                    <img
+                      src={photo.src}
+                      alt={photo.caption}
+                      className="w-full h-full object-cover select-none pointer-events-none"
+                    />
+                  </div>
+                  {/* Polaroid caption */}
+                  <p className="mt-4 text-center font-romantic text-xl text-slate-800 font-semibold px-2">
+                    {photo.caption}
+                  </p>
                 </div>
-                <h4 className="text-xl font-bold text-pink-100">Our First Date</h4>
-                <span className="text-xs text-rose-400 font-medium tracking-wide uppercase mt-1">The day everything changed</span>
-                <p className="mt-4 text-sm text-pink-200/80 leading-relaxed">
-                  Every detail is etched in my heart—your gorgeous smile, the nervous laughter, and that immediate spark that made the rest of the world vanish.
-                </p>
-              </div>
-
-              {/* Card 2 */}
-              <div className="relative group overflow-hidden rounded-3xl border border-pink-500/20 bg-slate-900/60 backdrop-blur-lg p-6 shadow-xl flex flex-col items-center text-center transition-all duration-300 hover:border-pink-500/40 hover:-translate-y-2">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
-                <div className="w-20 h-20 mb-6 bg-purple-500/10 rounded-full flex items-center justify-center">
-                  <span className="text-3xl">📸</span>
-                </div>
-                <h4 className="text-xl font-bold text-pink-100">Sweet Memories</h4>
-                <span className="text-xs text-rose-400 font-medium tracking-wide uppercase mt-1">Laughter and adventures</span>
-                <p className="mt-4 text-sm text-pink-200/80 leading-relaxed">
-                  From late-night deep conversations to silly inside jokes and spontaneous road trips, every second spent next to you is a treasure I cherish.
-                </p>
-              </div>
-
-              {/* Card 3 */}
-              <div className="relative group overflow-hidden rounded-3xl border border-pink-500/20 bg-slate-900/60 backdrop-blur-lg p-6 shadow-xl flex flex-col items-center text-center transition-all duration-300 hover:border-pink-500/40 hover:-translate-y-2">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-pink-400 to-yellow-500" />
-                <div className="w-20 h-20 mb-6 bg-yellow-500/10 rounded-full flex items-center justify-center">
-                  <span className="text-3xl">💍</span>
-                </div>
-                <h4 className="text-xl font-bold text-pink-100">Our Future</h4>
-                <span className="text-xs text-rose-400 font-medium tracking-wide uppercase mt-1">Together forever</span>
-                <p className="mt-4 text-sm text-pink-200/80 leading-relaxed">
-                  This is still just the beautiful beginning of our story. I can't wait for all the tomorrows, laughs, and adventures waiting for us.
-                </p>
-              </div>
+              ))}
             </div>
           </section>
 
@@ -546,6 +600,37 @@ export default function Home() {
 
         </div>
       )}
+
+      {/* Polaroid Full-Screen Lightbox Modal */}
+      {stage === "story" && activePhoto !== null && (
+        <div 
+          onClick={() => setActivePhoto(null)}
+          className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-2xl w-full bg-white p-3 rounded-2xl shadow-2xl flex flex-col items-center animate-scale-in"
+          >
+            <div className="w-full overflow-hidden bg-zinc-100 rounded-lg max-h-[72vh] flex items-center justify-center">
+              <img 
+                src={ALBUM_PHOTOS[activePhoto].src} 
+                alt={ALBUM_PHOTOS[activePhoto].caption} 
+                className="max-h-[70vh] object-contain rounded-md select-none pointer-events-none"
+              />
+            </div>
+            <p className="mt-5 mb-2 text-slate-800 font-romantic text-2xl md:text-3xl text-center px-4 font-bold">
+              {ALBUM_PHOTOS[activePhoto].caption}
+            </p>
+            <button 
+              onClick={() => setActivePhoto(null)}
+              className="absolute -top-3 -right-3 bg-rose-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg hover:bg-rose-700 transition-colors shadow-lg border-2 border-white"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
