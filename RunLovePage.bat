@@ -1,0 +1,3 @@
+@echo off
+echo Starting Love Page Development Server...
+npm run dev
