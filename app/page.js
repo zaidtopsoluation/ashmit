@@ -10,7 +10,7 @@ const ROSE_TYPES = [
   { src: "/rose-purple.png", glow: "rgba(192, 132, 252, 0.4)", shadow: "drop-shadow(0 0 12px rgba(192, 132, 252, 0.5))" } // Purple Rose
 ];
 
-// Polaroid Album Photos config (Now containing 7 couple memories)
+// Polaroid Album Photos config (Now containing 8 couple memories)
 const ALBUM_PHOTOS = [
   { 
     src: "/album-1.jpg", 
@@ -29,7 +29,7 @@ const ALBUM_PHOTOS = [
   },
   { 
     src: "/album-4.jpg", 
-    caption: "Watching sunsets in your arms 🌅", 
+    caption: "Watching the sun rise in your arms 🌅", 
     rotate: "rotate-2"
   },
   { 
@@ -46,6 +46,11 @@ const ALBUM_PHOTOS = [
     src: "/album-7.jpg", 
     caption: "Mirror tiles and sweet smiles 💖", 
     rotate: "-rotate-2"
+  },
+  { 
+    src: "/album-8.jpg", 
+    caption: "Sunsets, beach chairs, and you 🏖🌅", 
+    rotate: "rotate-3"
   }
 ];
 
